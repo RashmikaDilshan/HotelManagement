@@ -15,12 +15,24 @@ public class RoomService {
     //View all rooms
     public List<Room> getAllRooms() {
         return roomRepository.findAll();
-    }
+    }   
 
-    
-
+    //Create a room
     public Room insertRoom(Room room) {
         return roomRepository.save(room);
+    }
+
+    //Update a room status with room id
+    public Room updateRoomStatus(Room room) {       
+        Room existingRoom = roomRepository.findById(room.getRoomId()).orElse(null);
+        if (existingRoom != null) {
+            existingRoom.setStatus(room.getStatus());
+            return roomRepository.save(existingRoom);        
+        }else {
+            throw new RuntimeException("Room not found with ID: " + room.getRoomId());
+        }       
+        
+        
     }
 
 }

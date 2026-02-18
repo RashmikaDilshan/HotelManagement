@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +14,7 @@ import com.nsbm.group03.roomManagementService.Entity.Room;
 import com.nsbm.group03.roomManagementService.Service.RoomService;
 
 @RestController
-@RequestMapping(value = "/rooms")
+@RequestMapping(value = "/api/rooms")
 public class RoomController {
 
     @Autowired
@@ -29,6 +30,12 @@ public class RoomController {
     @PostMapping
     public Room createRoom(@RequestBody Room room) {
         return roomService.insertRoom(room);
+    }
+
+    //update a room status with room number
+    @PatchMapping("/updateStatus")
+    public Room updateRoomStatus(@RequestBody Room room) {
+        return roomService.updateRoomStatus(room);
     }
     
     
