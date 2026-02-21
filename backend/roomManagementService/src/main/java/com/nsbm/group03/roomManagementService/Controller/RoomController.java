@@ -37,6 +37,11 @@ public class RoomController {
     public Room updateRoomStatus(@RequestBody Room room) {
         return roomService.updateRoomStatus(room);
     }
+    //Get only available rooms (For the booking website)
+    @GetMapping("/available")
+    public List<Room> getAvailableRooms() {
+        return roomService.getAvailableRooms();
+    }
     
     
 }
