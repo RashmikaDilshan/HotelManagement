@@ -3,6 +3,7 @@ package com.nsbm.group03.roomManagementService.Entity;
 import java.util.UUID;
 
 import com.nsbm.group03.roomManagementService.Enum.RoomStatus;
+import com.nsbm.group03.roomManagementService.Enum.RoomType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +11,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
+
 
 @Entity
 public class Room {
@@ -19,9 +21,12 @@ public class Room {
     
     @Column(unique = true, nullable = false)
     private String roomNumber;
-    private String roomType;
     private double pricePerNight;
     private int capacity;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RoomType roomType;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -35,7 +40,7 @@ public class Room {
     public Room() {
     }
 
-    public Room(String roomId, String roomNumber, String roomType, double pricePerNight, int capacity, RoomStatus status) {
+    public Room(String roomId, String roomNumber, RoomType roomType, double pricePerNight, int capacity, RoomStatus status) {
         this.roomId = roomId;
         this.roomNumber = roomNumber;
         this.roomType = roomType;
@@ -58,10 +63,10 @@ public class Room {
     public void setRoomNumber(String roomNumber) {
         this.roomNumber = roomNumber;
     }
-    public String getRoomType() {
+    public RoomType getRoomType() {
         return roomType;
     }
-    public void setRoomType(String roomType) {
+    public void setRoomType(RoomType roomType) {
         this.roomType = roomType;
     }
     public double getPricePerNight() {
@@ -88,7 +93,5 @@ public class Room {
         return "Room [roomId=" + roomId + ", roomNumber=" + roomNumber + ", roomType=" + roomType + ", pricePerNight="
                 + pricePerNight + ", capacity=" + capacity + ", status=" + status + "]";
     }   
-
-
 
 }
