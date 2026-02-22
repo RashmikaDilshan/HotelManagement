@@ -38,4 +38,9 @@ public class RoomService {
         return roomRepository.findByStatus(RoomStatus.AVAILABLE);        
     }
 
+    //Get a room by room number  
+    public Room getRoomByNumber(String roomNumber) {
+        return roomRepository.findByRoomNumber(roomNumber);
+    }
+
 }

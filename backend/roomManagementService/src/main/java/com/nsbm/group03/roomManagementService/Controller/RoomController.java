@@ -5,43 +5,59 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nsbm.group03.roomManagementService.Entity.Room;
+import com.nsbm.group03.roomManagementService.Mapper.RoomMapper;
 import com.nsbm.group03.roomManagementService.Service.RoomService;
+import com.nsbm.group03.roomManagementService.Dto.*;
 
 @RestController
-@RequestMapping(value = "/api/rooms")
+@RequestMapping("/api/rooms")
 public class RoomController {
 
     @Autowired
     private RoomService roomService;
-    
-    //views all rooms
+
+    // GET all rooms
     @GetMapping
-    public  List<Room> getAllRooms() {
-        return roomService.getAllRooms();
-    }
-    
-    //create a room
-    @PostMapping
-    public Room createRoom(@RequestBody Room room) {
-        return roomService.insertRoom(room);
+    public List<RoomDTO> getAllRooms() {
+        List<Room> rooms = roomService.getAllRooms();
+        return RoomMapper.toRoomDTOList(rooms);
     }
 
-    //update a room status with room number
+    // GET a room by room number
+    @GetMapping("/{roomNumber}")
+    public RoomDTO getRoomByNumber(@PathVariable String roomNumber) {
+        Room room = roomService.getRoomByNumber(roomNumber);
+        return RoomMapper.toRoomDTO(room);
+    }
+
+
+    // POST create room
+    @PostMapping
+    public RoomDTO createRoom(@RequestBody RoomCreateDTO createDTO) {
+        Room room = RoomMapper.toEntity(createDTO);
+        Room savedRoom = roomService.insertRoom(room);
+        return RoomMapper.toRoomDTO(savedRoom);
+    }
+
+    // PATCH update room status
     @PatchMapping("/updateStatus")
-    public Room updateRoomStatus(@RequestBody Room room) {
-        return roomService.updateRoomStatus(room);
+    public RoomDTO updateRoomStatus(@RequestBody RoomStatusUpdateDTO statusDTO) {
+        Room room = RoomMapper.toEntity(statusDTO);
+        Room updatedRoom = roomService.updateRoomStatus(room);
+        return RoomMapper.toRoomDTO(updatedRoom);
     }
-    //Get only available rooms (For the booking website)
-    @GetMapping("/available")
-    public List<Room> getAvailableRooms() {
-        return roomService.getAvailableRooms();
+
+    // GET available rooms
+    @GetMapping("/available") 
+    public List<RoomAvailabilityDTO> getAvailableRooms() {
+        List<Room> availableRooms = roomService.getAvailableRooms();
+        return RoomMapper.toRoomAvailabilityDTOList(availableRooms);
     }
-    
-    
 }

@@ -11,6 +11,10 @@ import com.nsbm.group03.roomManagementService.Enum.RoomStatus;
 public interface RoomRepository extends JpaRepository<Room, String> {
 
       List<Room> findByStatus(RoomStatus status);
+
+      Room findByRoomNumber(String roomNumber);
+
+
       
 
 }
