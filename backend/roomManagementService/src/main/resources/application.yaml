@@ -2,14 +2,12 @@ spring:
   application:
     name: roomManagementService
 
-  
   datasource:   
     url: jdbc:mysql://localhost:3306/hms
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root 
     password: 1234
 
-  
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
@@ -18,4 +16,13 @@ spring:
 
 server:
   port: 8082
+  
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+  default-produces-media-type: application/json
 

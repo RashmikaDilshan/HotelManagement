@@ -37,7 +37,6 @@ public class RoomController {
         return RoomMapper.toRoomDTO(room);
     }
 
-
     // POST create room
     @PostMapping
     public RoomDTO createRoom(@RequestBody RoomCreateDTO createDTO) {
