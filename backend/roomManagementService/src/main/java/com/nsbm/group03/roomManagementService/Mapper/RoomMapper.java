@@ -58,9 +58,8 @@ public class RoomMapper {
 
     // RoomStatusUpdateDTO → Entity (for update)
     public static Room toEntity(RoomStatusUpdateDTO dto) {
-        if (dto == null) return null;
-        Room room = new Room();
-        room.setRoomId(dto.getRoomId());
+        if (dto == null) return null ;
+        Room room = new Room();        
         room.setRoomNumber(dto.getRoomNumber());
         room.setStatus(dto.getStatus());
         return room;

@@ -37,8 +37,7 @@ public class RoomController {
         if (room == null) {
             throw new RuntimeException("Invalid room number: " + roomNumber);
         }
-        return RoomMapper.toRoomDTO(room);
-        
+        return RoomMapper.toRoomDTO(room);        
     }
 
     // POST create room

@@ -23,9 +23,9 @@ public class RoomService {
         return roomRepository.save(room);        
     }
 
-    //Update a room status with room id
+    //Update a room status with room number
     public Room updateRoomStatus(Room room) { 
-        Room existingRoom = roomRepository.findById(room.getRoomId()).orElse(null);
+        Room existingRoom = roomRepository.findByRoomNumber(room.getRoomNumber());
         if (existingRoom != null) {
             existingRoom.setStatus(room.getStatus());
             return roomRepository.save(existingRoom);
@@ -43,6 +43,7 @@ public class RoomService {
         return roomRepository.findByRoomNumber(roomNumber);
     }
 
+    //Delete a room by room number
     public void deleteRoom(String roomNumber) {
         Room room = getRoomByNumber(roomNumber);
         if (room != null) {
