@@ -7,6 +7,7 @@ import com.nsbm.group03.roomManagementService.Dto.*;
 import java.util.stream.Collectors;
 import java.util.List;
 
+// Mapper class to convert between Room entity and various DTOs
 public class RoomMapper {
 
     // Entity → RoomDTO

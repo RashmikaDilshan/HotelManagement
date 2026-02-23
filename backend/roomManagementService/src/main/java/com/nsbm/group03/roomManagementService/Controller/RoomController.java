@@ -30,11 +30,15 @@ public class RoomController {
         return RoomMapper.toRoomDTOList(rooms);
     }
 
-    // GET a room by room number
+    // GET a room by room number if not return invalid room number
     @GetMapping("/{roomNumber}")
     public RoomDTO getRoomByNumber(@PathVariable String roomNumber) {
         Room room = roomService.getRoomByNumber(roomNumber);
+        if (room == null) {
+            throw new RuntimeException("Invalid room number: " + roomNumber);
+        }
         return RoomMapper.toRoomDTO(room);
+        
     }
 
     // POST create room
@@ -43,6 +47,13 @@ public class RoomController {
         Room room = RoomMapper.toEntity(createDTO);
         Room savedRoom = roomService.insertRoom(room);
         return RoomMapper.toRoomDTO(savedRoom);
+    }
+
+    // DELETE a room by room number
+    @GetMapping("/delete/{roomNumber}")
+    public String deleteRoom(@PathVariable String roomNumber) {
+        roomService.deleteRoom(roomNumber);
+        return "Room with number " + roomNumber + " has been deleted.";
     }
 
     // PATCH update room status

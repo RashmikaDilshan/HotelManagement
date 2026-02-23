@@ -43,4 +43,11 @@ public class RoomService {
         return roomRepository.findByRoomNumber(roomNumber);
     }
 
+    public void deleteRoom(String roomNumber) {
+        Room room = getRoomByNumber(roomNumber);
+        if (room != null) {
+            roomRepository.delete(room);
+        }
+    }
+
 }
