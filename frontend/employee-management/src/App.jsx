@@ -1,6 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import EmployeeList from './pages/EmployeeList';
 import EmployeeDetails from './pages/EmployeeDetails';
@@ -22,16 +25,53 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <Layout>
+        <AuthProvider>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/employees" element={<EmployeeList />} />
-            <Route path="/employees/:id" element={<EmployeeDetails />} />
-            <Route path="/employees/add" element={<AddEmployee />} />
-            <Route path="/employees/edit/:id" element={<EditEmployee />} />
-            <Route path="/statistics" element={<Statistics />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Dashboard />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/employees" element={
+              <ProtectedRoute>
+                <Layout>
+                  <EmployeeList />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/employees/:id" element={
+              <ProtectedRoute>
+                <Layout>
+                  <EmployeeDetails />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/employees/add" element={
+              <ProtectedRoute>
+                <Layout>
+                  <AddEmployee />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/employees/edit/:id" element={
+              <ProtectedRoute>
+                <Layout>
+                  <EditEmployee />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/statistics" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Statistics />
+                </Layout>
+              </ProtectedRoute>
+            } />
           </Routes>
-        </Layout>
+        </AuthProvider>
       </Router>
     </QueryClientProvider>
   );

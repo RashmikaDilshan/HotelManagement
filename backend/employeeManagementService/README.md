@@ -1,20 +1,102 @@
 # Employee Management Service
 
-Employee Management Service for Hotel Management System - A comprehensive microservice for managing employee information, departments, positions, and status tracking.
+Employee Management Service for Hotel Management System - A comprehensive microservice for managing employee information, departments, positions, status tracking, and **centralized authentication** for all microservices.
+
+## 🔐 Authentication System
+
+This service acts as the **Authentication Server** for the entire hotel management microservices ecosystem.
+
+### Key Features
+- ✅ **JWT Token-based Authentication** - Secure token generation and validation
+- ✅ **BCrypt Password Encryption** - Industry-standard password hashing
+- ✅ **Role-Based Access Control (RBAC)** - ADMIN, MANAGER, SUPERVISOR, EMPLOYEE roles
+- ✅ **Account Security** - Automatic lockout after 5 failed login attempts
+- ✅ **Token Validation API** - Other microservices can validate tokens
+- ✅ **Session Management** - 24-hour token expiration
+- ✅ **Protected Endpoints** - All API calls require authentication
+
+### Default Admin Credentials
+```
+Username: admin
+Password: password123
+Role: ADMIN
+```
+
+### Sample User Accounts
+- `kasun` / `password123` (MANAGER - Front Desk)
+- `sanduni` / `password123` (EMPLOYEE - Front Desk)
+- `roshan` / `password123` (SUPERVISOR - Kitchen)
+- `anil` / `password123` (MANAGER - Restaurant)
+
+**All 20 employees have default password:** `password123`
+
+### Authentication Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| `POST` | `/api/auth/login` | User login (returns JWT token) | ❌ No |
+| `POST` | `/api/auth/validate` | Validate JWT token | ❌ No |
+| `POST` | `/api/auth/change-password` | Change password | ✅ Yes |
+| `POST` | `/api/auth/unlock-account/{id}` | Unlock locked account | ✅ Yes |
+| `GET` | `/api/auth/me` | Get current user info | ✅ Yes |
+
+### Login Example
+```bash
+curl -X POST http://localhost:8085/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "password123"
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiJ9...",
+    "username": "admin",
+    "email": "aruna.wickremesinghe@hotel.com",
+    "fullName": "Aruna Wickremesinghe",
+    "role": "ADMIN",
+    "employeeId": 16
+  }
+}
+```
+
+### Using JWT Token in Requests
+```bash
+curl -X GET http://localhost:8085/api/employees \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
+```
+
+📖 **Detailed Authentication Guide:** See [AUTHENTICATION_GUIDE.md](AUTHENTICATION_GUIDE.md) for complete implementation details.
 
 ## 📌 Quick Start
 
-The Employee Management Service is currently **running** and ready to use:
+The Employee Management Service with Authentication:
 
 - **Service URL**: http://localhost:8085
+- **Frontend URL**: http://localhost:5173 (React + Vite)
+- **Login Page**: http://localhost:5173/login
 - **API Documentation (Swagger)**: http://localhost:8085/swagger-ui.html
 - **Health Check**: http://localhost:8085/actuator/health
 - **H2 Database Console**: http://localhost:8085/h2-console
 
-**Pre-loaded Data**: 20 sample employees are automatically loaded on startup for testing purposes.
+**Pre-loaded Data**: 20 Sri Lankan employees with credentials automatically loaded on startup.
 
 ## 🚀 Features
 
+### Authentication & Security
+- **JWT Token Authentication**: Secure token-based authentication system
+- **Password Encryption**: BCrypt hashing with salt
+- **Role-Based Access Control**: ADMIN, MANAGER, SUPERVISOR, EMPLOYEE roles
+- **Account Lockout**: Automatic lockout after 5 failed login attempts
+- **Token Validation API**: For other microservices to validate authentication
+- **Protected Endpoints**: All employee data APIs require valid JWT token
+
+### Employee Management
 - **Complete CRUD Operations**: Create, Read, Update, and Delete employee records
 - **Advanced Search & Filtering**: 
   - Search employees by name (first name or last name)
@@ -26,23 +108,40 @@ The Employee Management Service is currently **running** and ready to use:
   - Overall employee statistics (total, active, inactive, on leave)
   - Department-wise statistics (employee count, average salary, total salary expense)
   - Employee count and active employee count endpoints
+
+### Technical Features
 - **Input Validation**: Comprehensive validation on all employee data
 - **Exception Handling**: Global exception handling with detailed error responses
 - **API Documentation**: Interactive Swagger/OpenAPI documentation
 - **Logging**: Detailed logging for monitoring and debugging
 - **Health Monitoring**: Spring Boot Actuator endpoints for health checks
-- **Sample Data**: Pre-loaded with 20 sample employees across all departments for testing
+- **CORS Enabled**: Cross-origin requests allowed for frontend integration
+- **Sample Data**: Pre-loaded with 20 Sri Lankan employees with credentials for testing
 
 ## 🛠️ Technology Stack
 
+### Core Framework
 - **Java 21**
 - **Spring Boot 3.2.1**
 - **Spring Data JPA** - Database access and ORM
 - **Spring Boot Validation** - Input validation
+
+### Security
+- **Spring Security** - Authentication and authorization framework
+- **JWT (JSON Web Tokens)** - Token-based authentication
+- **BCrypt** - Password hashing algorithm
+
+### Database & Storage
 - **H2 Database** - In-memory database for development
-- **Swagger/OpenAPI 3** - API documentation
-- **JUnit 5 & Mockito** - Unit testing
-- **SLF4J/Logback** - Logging
+- **Hibernate** - ORM implementation
+
+### Documentation & Monitoring
+- **Swagger/OpenAPI 3** - Interactive API documentation
+- **Spring Boot Actuator** - Health checks and monitoring
+- **SLF4J/Logback** - Application logging
+
+### Testing & Build
+- **JUnit 5 & Mockito** - Unit testing framework
 - **Maven** - Build and dependency management
 
 ## 📋 Prerequisites
@@ -53,8 +152,13 @@ The Employee Management Service is currently **running** and ready to use:
 
 ## 🏃 Running the Service
 
-### Using Maven Wrapper (Recommended)
+### Backend (Spring Boot)
+
+#### Using Maven Wrapper (Recommended)
 ```bash
+# Navigate to backend directory
+cd backend/employeeManagementService
+
 # Windows
 mvnw.cmd spring-boot:run
 
@@ -62,18 +166,20 @@ mvnw.cmd spring-boot:run
 ./mvnw spring-boot:run
 ```
 
-### Using Maven
+Service will start on: **http://localhost:8085**
+
+#### Using Maven
 ```bash
 mvn spring-boot:run
 ```
 
-### Using JAR
+#### Using JAR
 ```bash
 mvn clean package
 java -jar target/employeeManagementService-0.0.1-SNAPSHOT.jar
 ```
 
-### Using Docker
+#### Using Docker
 ```bash
 # Build Docker image
 docker build -t employee-management-service .
@@ -82,21 +188,78 @@ docker build -t employee-management-service .
 docker run -p 8085:8085 employee-management-service
 ```
 
+### Frontend (React + Vite)
+
+```bash
+# Navigate to frontend directory
+cd frontend/employee-management
+
+# Install dependencies (first time only)
+npm install
+
+# Start development server
+npm run dev
+```
+
+Frontend will start on: **http://localhost:5173**
+
+### Access Points
+- **Login Page**: http://localhost:5173/login
+- **Dashboard**: http://localhost:5173/ (requires login)
+- **API Swagger**: http://localhost:8085/swagger-ui.html
+- **H2 Console**: http://localhost:8085/h2-console
+
 ## 🎯 Testing the Service
 
-### Option 1: Using Swagger UI (Recommended)
-1. Open your browser and navigate to: **http://localhost:8085/swagger-ui.html**
-2. You'll see all 15 API endpoints with interactive documentation
-3. Click on any endpoint to expand it
-4. Click "Try it out" to test the endpoint
-5. Fill in the required parameters and click "Execute"
-6. View the response directly in the browser
+### Option 1: Using the Frontend (Recommended)
+1. Start both backend and frontend services
+2. Open your browser: **http://localhost:5173/login**
+3. Login with:
+   - Username: `admin`
+   - Password: `password123`
+4. Navigate through the dashboard to:
+   - View all employees
+   - Add new employees
+   - Edit employee details
+   - View statistics
+   - Search and filter employees
 
-### Option 2: Using cURL Commands
+### Option 2: Using Swagger UI
+1. First, **login to get a JWT token**:
+   ```bash
+   curl -X POST http://localhost:8085/api/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"username":"admin","password":"password123"}'
+   ```
+   
+2. Copy the token from the response
+
+3. Open Swagger UI: **http://localhost:8085/swagger-ui.html**
+
+4. Click "Authorize" button at the top
+
+5. Enter: `Bearer <your-token>` (replace `<your-token>` with actual token)
+
+6. Now you can test all endpoints interactively
+
+### Option 3: Using cURL Commands
+
+**Step 1: Login and get token**
+```bash
+curl -X POST http://localhost:8085/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "password123"
+  }'
+```
+
+**Step 2: Use token in requests**
 
 **Get All Employees:**
 ```bash
-curl -X GET http://localhost:8085/api/employees
+curl -X GET http://localhost:8085/api/employees \
+  -H "Authorization: Bearer <your-token>"
 ```
 
 **Get Employee by ID:**
@@ -135,12 +298,24 @@ curl -X GET http://localhost:8085/api/employees/status/ACTIVE
 
 ## 📡 API Endpoints
 
-### Base URL
-```
-http://localhost:8085/api/employees
-```
+### Authentication Endpoints (Public - No Token Required)
 
-### Employee Operations
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/auth/login` | User login (returns JWT token) |
+| `POST` | `/api/auth/validate` | Validate JWT token (for microservices) |
+
+### Authentication Endpoints (Protected - Token Required)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/auth/change-password` | Change account password |
+| `POST` | `/api/auth/unlock-account/{id}` | Unlock locked account (Admin) |
+| `GET` | `/api/auth/me` | Get current authenticated user |
+
+### Employee Endpoints (Protected - Token Required)
+
+**Base URL:** `http://localhost:8085/api/employees`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -159,6 +334,11 @@ http://localhost:8085/api/employees
 | `GET` | `/api/employees/statistics/departments` | Get department-wise statistics |
 | `GET` | `/api/employees/count` | Get total employee count |
 | `GET` | `/api/employees/count/active` | Get active employee count |
+
+⚠️ **Important:** All employee endpoints require a valid JWT token in the Authorization header:
+```
+Authorization: Bearer <your-jwt-token>
+```
 
 ### Example Request: Create Employee
 
@@ -349,12 +529,59 @@ The service automatically loads **20 sample employees** on startup across 7 depa
 | **SECURITY** | 2 | Manager, Security Guard |
 
 **Status Distribution:**
-- Active: 18 employees
-- Inactive: 1 employee
+- Active: 19 employees
+- Inactive: 0 employees
 - On Leave: 1 employee
 
-**Salary Range:** $29,000 - $85,000
-**Average Salary:** $47,150
+**Salary Range:** Rs. 44,000 - Rs. 125,000
+**Average Salary:** Rs. 72,550
+
+**All employees have login credentials:**
+- Username: Based on first name (lowercase)
+- Password: `password123` (default for all)
+- Roles: Based on position (ADMIN, MANAGER, SUPERVISOR, EMPLOYEE)
+
+## 🎨 Frontend Application
+
+The service includes a complete **React + Vite** frontend application with modern UI.
+
+### Features
+- **Authentication System**: Login page with JWT token management
+- **Protected Routes**: All pages require authentication
+- **Dashboard**: Overview statistics and quick actions
+- **Employee List**: Search, filter, and manage employees
+- **Employee Details**: View complete employee information
+- **Add/Edit Forms**: Create and update employee records
+- **Statistics Page**: Department-wise analytics and insights
+- **User Profile**: Display logged-in user info with logout
+- **Responsive Design**: Modern blue gradient theme with gold accents
+- **Hotel Branding**: ආලකමන්දා (Alakamanda) Hotel logo
+
+### Technology Stack
+- **React 18.3.1** - UI library
+- **Vite 8.0.0** - Build tool with HMR
+- **React Router DOM v7** - Client-side routing
+- **TanStack React Query v5** - Data fetching and caching
+- **Axios** - HTTP client with JWT interceptors
+- **Lucide React** - Icon library
+
+### Pages
+1. **Login** (`/login`) - Authentication page
+2. **Dashboard** (`/`) - Statistics overview
+3. **Employee List** (`/employees`) - Table with search/filter
+4. **Employee Details** (`/employees/:id`) - Individual profile
+5. **Add Employee** (`/employees/add`) - Creation form
+6. **Edit Employee** (`/employees/edit/:id`) - Update form
+7. **Statistics** (`/statistics`) - Department analytics
+
+### Running Frontend
+```bash
+cd ../../frontend/employee-management
+npm install       # First time only
+npm run dev       # Start dev server
+```
+
+Access at: **http://localhost:5173**
 
 ## 🔧 Configuration
 
@@ -376,39 +603,51 @@ spring:
 
 ## 📦 Project Structure
 
+### Backend (Spring Boot)
 ```
 employeeManagementService/
 ├── src/
 │   ├── main/
 │   │   ├── java/com/nsbm/group03/employeeManagementService/
 │   │   │   ├── config/
-│   │   │   │   ├── DataInitializer.java      # Loads 20 sample employees
-│   │   │   │   └── OpenAPIConfig.java        # Swagger configuration
+│   │   │   │   ├── DataInitializer.java          # Loads 20 employees with credentials
+│   │   │   │   ├── OpenAPIConfig.java            # Swagger configuration
+│   │   │   │   ├── SecurityConfig.java           # Spring Security + JWT config
+│   │   │   │   └── JwtAuthenticationFilter.java  # JWT token validation filter
 │   │   │   ├── controller/
-│   │   │   │   └── EmployeeController.java   # 15 REST endpoints
+│   │   │   │   ├── EmployeeController.java       # 15 employee REST endpoints
+│   │   │   │   └── AuthenticationController.java # 5 auth endpoints
 │   │   │   ├── dto/
-│   │   │   │   ├── EmployeeDTO.java          # Employee data transfer object
-│   │   │   │   ├── EmployeeStatisticsDTO.java # Statistics DTO
-│   │   │   │   └── DepartmentStatisticsDTO.java # Dept statistics DTO
+│   │   │   │   ├── EmployeeDTO.java              # Employee data transfer object
+│   │   │   │   ├── EmployeeStatisticsDTO.java    # Statistics DTO
+│   │   │   │   ├── DepartmentStatisticsDTO.java  # Dept statistics DTO
+│   │   │   │   ├── LoginRequest.java             # Login credentials
+│   │   │   │   ├── LoginResponse.java            # JWT token + user info
+│   │   │   │   ├── AuthValidateRequest.java      # Token validation request
+│   │   │   │   ├── AuthValidateResponse.java     # Token validation response
+│   │   │   │   └── ChangePasswordRequest.java    # Password change request
 │   │   │   ├── entity/
-│   │   │   │   └── Employee.java             # JPA entity
+│   │   │   │   └── Employee.java                 # JPA entity with auth fields
 │   │   │   ├── enums/
-│   │   │   │   ├── Department.java           # Department enum
-│   │   │   │   └── EmployeeStatus.java       # Status enum
+│   │   │   │   ├── Department.java               # Department enum
+│   │   │   │   └── EmployeeStatus.java           # Status enum
 │   │   │   ├── exception/
-│   │   │   │   ├── GlobalExceptionHandler.java # Centralized exception handling
+│   │   │   │   ├── GlobalExceptionHandler.java   # Centralized exception handling
 │   │   │   │   ├── ResourceNotFoundException.java
 │   │   │   │   ├── DuplicateResourceException.java
-│   │   │   │   └── ErrorResponse.java        # Error response structure
+│   │   │   │   └── ErrorResponse.java            # Error response structure
 │   │   │   ├── repository/
-│   │   │   │   └── EmployeeRepository.java   # JPA repository with custom queries
+│   │   │   │   └── EmployeeRepository.java       # JPA repository with auth queries
 │   │   │   ├── response/
-│   │   │   │   └── ApiResponse.java          # Standard API response wrapper
+│   │   │   │   └── ApiResponse.java              # Standard API response wrapper
 │   │   │   ├── service/
-│   │   │   │   └── EmployeeService.java      # Business logic (15+ methods)
+│   │   │   │   ├── EmployeeService.java          # Business logic (15+ methods)
+│   │   │   │   ├── AuthenticationService.java    # Login, token validation, lockout
+│   │   │   │   ├── JwtService.java               # JWT token generation/validation
+│   │   │   │   └── CustomUserDetailsService.java # Spring Security user loading
 │   │   │   └── EmployeeManagementServiceApplication.java # Main application
 │   │   └── resources/
-│   │       ├── application.yaml              # Configuration
+│   │       ├── application.yaml              # Configuration + JWT settings
 │   │       └── application.properties
 │   └── test/
 │       └── java/com/nsbm/group03/employeeManagementService/
@@ -419,8 +658,63 @@ employeeManagementService/
 │           └── EmployeeManagementServiceApplicationTests.java # 1 context test
 ├── target/                                    # Build output
 ├── Dockerfile                                 # Docker configuration
-├── pom.xml                                    # Maven dependencies
+├── pom.xml                                    # Maven dependencies (Security + JWT)
 ├── mvnw.cmd / mvnw                           # Maven wrapper
+├── README.md                                  # This file
+└── AUTHENTICATION_GUIDE.md                    # Complete auth implementation guide
+```
+
+### Frontend (React + Vite)
+```
+employee-management/
+├── public/
+│   ├── Hotel_Logo.png                        # Hotel branding logo
+│   └── vite.svg
+├── src/
+│   ├── assets/
+│   ├── components/
+│   │   ├── Layout.jsx                        # Main layout wrapper
+│   │   ├── Layout.css
+│   │   ├── Sidebar.jsx                       # Navigation with user profile
+│   │   ├── Sidebar.css
+│   │   └── ProtectedRoute.jsx                # Route guard for authentication
+│   ├── context/
+│   │   └── AuthContext.jsx                   # Authentication state management
+│   ├── pages/
+│   │   ├── Login.jsx                         # Login page
+│   │   ├── Login.css
+│   │   ├── Dashboard.jsx                     # Statistics overview
+│   │   ├── Dashboard.css
+│   │   ├── EmployeeList.jsx                  # Employee table with search/filter
+│   │   ├── EmployeeList.css
+│   │   ├── EmployeeDetails.jsx               # Individual employee view
+│   │   ├── EmployeeDetails.css
+│   │   ├── AddEmployee.jsx                   # Create employee form
+│   │   ├── EditEmployee.jsx                  # Update employee form
+│   │   ├── EmployeeForm.css
+│   │   ├── Statistics.jsx                    # Department analytics
+│   │   └── Statistics.css
+│   ├── services/
+│   │   └── api.js                            # Axios with JWT interceptors
+│   ├── App.jsx                               # Root component with routing
+│   ├── App.css                               # Global styles
+│   ├── main.jsx                              # Entry point
+│   └── index.css
+├── package.json                              # Dependencies
+├── vite.config.js                            # Vite configuration
+├── IMPLEMENTATION_SUMMARY.md                 # Frontend implementation details
+└── README.md                                 # Frontend documentation
+```
+
+**Total Backend Files:**
+- **28 Java source files** (11 new auth files)
+- **3 Test files** with 28 passing tests
+- **2 Configuration files** (YAML & Properties)
+
+**Total Frontend Files:**
+- **22 React components/pages**
+- **15 CSS files**
+- **1 API service with JWT interceptors**
 └── README.md                                  # This file
 ```
 

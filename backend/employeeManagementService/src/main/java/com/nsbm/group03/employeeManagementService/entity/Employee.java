@@ -2,6 +2,7 @@ package com.nsbm.group03.employeeManagementService.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "employees")
@@ -40,6 +41,25 @@ public class Employee {
     
     @Column(length = 500)
     private String address;
+    
+    // Authentication fields
+    @Column(unique = true, nullable = false)
+    private String username;
+    
+    @Column(nullable = false)
+    private String password; // BCrypt hashed
+    
+    @Column(nullable = false)
+    private String role; // ADMIN, MANAGER, EMPLOYEE, SUPERVISOR
+    
+    @Column(nullable = false)
+    private Boolean accountLocked = false;
+    
+    @Column(nullable = false)
+    private Integer loginAttempts = 0;
+    
+    @Column
+    private LocalDateTime lastLogin;
     
     // Constructors
     public Employee() {
@@ -147,5 +167,54 @@ public class Employee {
     
     public void setAddress(String address) {
         this.address = address;
+    }
+    
+    // Authentication getters and setters
+    public String getUsername() {
+        return username;
+    }
+    
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    
+    public String getPassword() {
+        return password;
+    }
+    
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
+    public String getRole() {
+        return role;
+    }
+    
+    public void setRole(String role) {
+        this.role = role;
+    }
+    
+    public Boolean getAccountLocked() {
+        return accountLocked;
+    }
+    
+    public void setAccountLocked(Boolean accountLocked) {
+        this.accountLocked = accountLocked;
+    }
+    
+    public Integer getLoginAttempts() {
+        return loginAttempts;
+    }
+    
+    public void setLoginAttempts(Integer loginAttempts) {
+        this.loginAttempts = loginAttempts;
+    }
+    
+    public LocalDateTime getLastLogin() {
+        return lastLogin;
+    }
+    
+    public void setLastLogin(LocalDateTime lastLogin) {
+        this.lastLogin = lastLogin;
     }
 }
