@@ -17,6 +17,9 @@ public class ReservationDTO {
         private LocalDate checkInDate;
         private LocalDate checkOutDate;
 
+        private double totalAmount;
+        private String specialRequests;
+
         private String status;
         private LocalDateTime createdAt;
 }

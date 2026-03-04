@@ -1,11 +1,20 @@
 import axios from 'axios';
 
-const api = axios.create({
-    baseURL: 'http://localhost:8081/api',
+const reservationApi = axios.create({
+  baseURL: 'http://localhost:8081/api',
 });
 
-export const saveGuest = (guestData) => api.post('/v1/guest/saveguest', guestData);
-export const saveReservation = (reservationData) => api.post('/reservations', reservationData);
-export const findGuestByPhoneNumber = (phoneNumber) => api.get(`/v1/guest/findGuestByPhoneNumber/${phoneNumber}`);
+const roomApi = axios.create({
+  baseURL: 'http://localhost:8082/api',
+});
 
-export default api;
+// Reservation Service Endpoints
+export const saveGuest = (guestData) => reservationApi.post('/v1/guest/saveguest', guestData);
+export const saveReservation = (reservationData) => reservationApi.post('/reservations', reservationData);
+export const findGuestByPhoneNumber = (phoneNumber) => reservationApi.get(`/v1/guest/findGuestByPhoneNumber/${phoneNumber}`);
+
+// Room Service Endpoints
+export const getAllRooms = () => roomApi.get('/rooms');
+export const getAvailableRooms = () => reservationApi.get('/reservations/available-rooms');
+
+export default { reservationApi, roomApi };
