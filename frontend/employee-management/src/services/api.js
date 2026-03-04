@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8085/api';
+// Use Vercel API proxy in production, direct HTTP in development
+const API_BASE_URL = process.env.NODE_ENV === 'production'
+  ? '/api'  // Vercel serverless function proxy
+  : 'http://employee-service-prod.eba-qkxxwi2w.us-east-1.elasticbeanstalk.com/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -80,6 +83,14 @@ export const employeeService = {
   
   // Get active employee count
   getActiveEmployeeCount: () => api.get('/employees/count/active'),
+};
+
+export const authService = {
+  // Login
+  login: (credentials) => api.post('/auth/login', credentials),
+  
+  // Validate token
+  validateToken: (token) => api.post('/auth/validate', { token }),
 };
 
 export default api;

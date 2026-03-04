@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { authService } from '../services/api';
 import './Login.css';
 
 const Login = () => {
@@ -16,10 +16,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8085/api/auth/login', {
-        username,
-        password
-      });
+      const response = await authService.login({ username, password });
 
       if (response.data.success) {
         const { token, username: userName, email, fullName, role, employeeId } = response.data.data;
@@ -28,7 +25,13 @@ const Login = () => {
         setError(response.data.message || 'Login failed');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid username or password');
+      console.error('Login error:', err);
+      // Check for mixed content or network errors
+      if (err.message && err.message.includes('Mixed Content')) {
+        setError('Security Error: Please use the local development server (http://localhost:5173) or configure HTTPS on the backend.');
+      } else {
+        setError(err.response?.data?.message || err.message || 'Invalid username or password');
+      }
     } finally {
       setLoading(false);
     }
@@ -78,10 +81,9 @@ const Login = () => {
 
         <div className="login-footer">
           <p className="help-text">
-            Default password: <strong>password123</strong>
-          </p>
-          <p className="help-text">
-            Admin username: <strong>admin</strong>
+            <strong>Admin credentials:</strong><br/>
+            Username: <strong>admin</strong><br/>
+            Password: <strong>admin123</strong>
           </p>
         </div>
       </div>
