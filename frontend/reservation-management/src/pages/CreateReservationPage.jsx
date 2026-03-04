@@ -101,23 +101,20 @@ const CreateReservationPage = () => {
 
     return (
         <div className="layout-container flex h-full grow flex-col bg-background">
-            <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-border bg-white px-10 py-3 sticky top-0 z-50">
+            <header className="h-16 border-b border-border bg-white flex items-center justify-between px-10 py-3 sticky top-0 z-50">
                 <div className="flex items-center gap-8">
-                    <div
-                        className="flex items-center gap-3 text-primary cursor-pointer"
-                        onClick={() => navigate('/')}
-                    >
-                        <div className="flex items-center gap-4 flex-1 max-w-xl">
-                            <img src={HotelLogo} alt="Hotel Logo" className="h-20 w-auto object-contain" />
-                            <h2 className="text-primary text-lg font-bold">Reservation Management</h2>
-                        </div>
+                    <div className="flex items-center gap-3 text-primary cursor-pointer" onClick={() => navigate('/')}>
+                        <img src={HotelLogo} alt="Hotel Logo" className="h-10 w-auto object-contain" />
+                        <h2 className="text-slate-900 text-lg font-bold">Reservation Management</h2>
                     </div>
+                    <nav className="flex items-center gap-6 ml-4">
+                        <button onClick={() => navigate('/')} className="text-text-secondary hover:text-primary text-sm font-medium transition-colors">Dashboard</button>
+                        <button onClick={() => navigate('/reservations')} className="text-text-secondary hover:text-primary text-sm font-medium transition-colors">Reservations</button>
+                        <button className="text-text-secondary hover:text-primary text-sm font-medium transition-colors">Guests</button>
+                    </nav>
                 </div>
                 <div className="flex flex-1 justify-end gap-8">
-                    <nav className="flex items-center gap-6">
-                        <button onClick={() => navigate('/')} className="text-text-secondary hover:text-primary text-sm font-medium transition-colors">Dashboard</button>
-                        <button className="text-primary text-sm font-bold border-b-2 border-primary py-4 -mb-4 transition-colors">Reservations</button>
-                    </nav>
+                    <button className="text-primary text-sm font-bold border-b-2 border-primary py-4 -mb-4 transition-colors">New Booking</button>
                 </div>
             </header>
 
