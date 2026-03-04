@@ -12,6 +12,7 @@ public class ReservationDTO {
 
         private Long reservationId;
         private Long guestId;
+        private GuestDTO guest;
 
         private String roomId;
         private LocalDate checkInDate;

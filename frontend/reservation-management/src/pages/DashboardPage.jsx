@@ -28,12 +28,32 @@ const DashboardPage = () => {
         maintenance: rooms.filter(r => r.status === 'MAINTENANCE').length,
     };
 
-    const getStatusColor = (status) => {
+    const getRoomStyles = (status) => {
         switch (status) {
-            case 'AVAILABLE': return 'status-green';
-            case 'OCCUPIED': return 'status-red';
-            case 'MAINTENANCE': return 'status-yellow';
-            default: return 'slate-400';
+            case 'AVAILABLE': return {
+                bg: 'bg-status-green/10',
+                border: 'border-status-green/30',
+                hover: 'hover:bg-status-green/20',
+                text: 'text-status-green'
+            };
+            case 'OCCUPIED': return {
+                bg: 'bg-status-red/10',
+                border: 'border-status-red/30',
+                hover: 'hover:bg-status-red/20',
+                text: 'text-status-red'
+            };
+            case 'MAINTENANCE': return {
+                bg: 'bg-status-yellow/10',
+                border: 'border-status-yellow/30',
+                hover: 'hover:bg-status-yellow/20',
+                text: 'text-status-yellow'
+            };
+            default: return {
+                bg: 'bg-slate-100',
+                border: 'border-slate-200',
+                hover: 'hover:bg-slate-200',
+                text: 'text-slate-400'
+            };
         }
     };
 
@@ -51,9 +71,16 @@ const DashboardPage = () => {
         <div className="flex h-screen overflow-hidden bg-background">
             <main className="flex-1 flex flex-col overflow-hidden">
                 <header className="h-16 border-b border-border bg-white flex items-center justify-between px-8">
-                    <div className="flex items-center gap-4 flex-1 max-w-xl">
-                        <img src={HotelLogo} alt="Hotel Logo" className="h-20 w-auto object-contain" />
-                        <h2 className="text-primary text-lg font-bold">Reservation Management</h2>
+                    <div className="flex items-center gap-8">
+                        <div className="flex items-center gap-3 text-primary cursor-pointer" onClick={() => navigate('/')}>
+                            <img src={HotelLogo} alt="Hotel Logo" className="h-10 w-auto object-contain" />
+                            <h2 className="text-slate-900 text-lg font-bold">Reservation Management</h2>
+                        </div>
+                        <nav className="flex items-center gap-6 ml-4">
+                            <button onClick={() => navigate('/')} className="text-primary text-sm font-bold border-b-2 border-primary py-5 -mb-0.5 transition-colors">Dashboard</button>
+                            <button onClick={() => navigate('/reservations')} className="text-text-secondary hover:text-primary text-sm font-medium transition-colors">Reservations</button>
+                            <button className="text-text-secondary hover:text-primary text-sm font-medium transition-colors">Guests</button>
+                        </nav>
                     </div>
                     <button
                         onClick={() => navigate('/reservation')}
@@ -118,15 +145,18 @@ const DashboardPage = () => {
                             </div>
                         </div>
                         <div className="grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-4">
-                            {rooms.map(room => (
-                                <div
-                                    key={room.roomNumber}
-                                    onClick={() => room.status === 'AVAILABLE' && handleBookNow(room)}
-                                    className={`aspect-square bg-${getStatusColor(room.status)}/10 border-2 border-${getStatusColor(room.status)}/30 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-${getStatusColor(room.status)}/20 transition-all`}
-                                >
-                                    <span className={`text-sm font-bold text-${getStatusColor(room.status)}`}>{room.roomNumber}</span>
-                                </div>
-                            ))}
+                            {rooms.map(room => {
+                                const styles = getRoomStyles(room.status);
+                                return (
+                                    <div
+                                        key={room.roomNumber}
+                                        onClick={() => room.status === 'AVAILABLE' && handleBookNow(room)}
+                                        className={`aspect-square ${styles.bg} border-2 ${styles.border} ${styles.hover} rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all`}
+                                    >
+                                        <span className={`text-sm font-bold ${styles.text}`}>{room.roomNumber}</span>
+                                    </div>
+                                );
+                            })}
                             {rooms.length === 0 && <p className="col-span-full text-center text-text-secondary py-4">No rooms found.</p>}
                         </div>
                     </div>

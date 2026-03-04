@@ -45,13 +45,26 @@ public class ReservationService {
     // Get All Reservations
     public List<ReservationDTO> getAllReservations() {
         List<Reservation> list = reservationRepository.findAll();
-        return modelMapper.map(list, new TypeToken<List<ReservationDTO>>() {}.getType());
+        return modelMapper.map(list, new TypeToken<List<ReservationDTO>>() {
+        }.getType());
     }
 
-    //  Get Reservations By Guest
+    // Get Reservations By Guest
     public List<ReservationDTO> getReservationsByGuest(Long guestId) {
         List<Reservation> list = reservationRepository.findByGuest_GuestId(guestId);
-        return modelMapper.map(list, new TypeToken<List<ReservationDTO>>() {}.getType());
+        return modelMapper.map(list, new TypeToken<List<ReservationDTO>>() {
+        }.getType());
+    }
+
+    // Update Status
+    public ReservationDTO updateStatus(Long id, String status) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+        reservation.setStatus(status.toUpperCase());
+        reservationRepository.save(reservation);
+
+        return modelMapper.map(reservation, ReservationDTO.class);
     }
 
     // Delete Reservation
