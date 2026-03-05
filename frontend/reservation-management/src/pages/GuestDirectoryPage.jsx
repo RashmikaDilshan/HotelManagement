@@ -138,7 +138,7 @@ const GuestDirectoryPage = () => {
                                                     </span>
                                                     <span className="text-slate-500 flex items-center gap-1.5">
                                                         <span className="material-symbols-outlined text-sm opacity-60">call</span>
-                                                        {guest.phone}
+                                                        {guest.phoneNumber}
                                                     </span>
                                                 </div>
                                             </td>
