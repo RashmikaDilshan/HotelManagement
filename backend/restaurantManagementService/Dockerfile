@@ -1,29 +1,30 @@
-FROM eclipse-temurin:17-jdk-alpine AS build
+# ── Stage 1: Build ──
+FROM eclipse-temurin:24-jdk-alpine AS build
 WORKDIR /app
 
-# Copy maven wrapper and pom.xml
+RUN apk add --no-cache dos2unix
+
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
+RUN dos2unix mvnw && chmod +x mvnw && ./mvnw dependency:go-offline -B
 
-# Download dependencies
-RUN ./mvnw dependency:go-offline -B
-
-# Copy source code
 COPY src src
+RUN ./mvnw clean package -DskipTests -Djava.version=24
 
-# Build the application
-RUN ./mvnw clean package -DskipTests
-
-# Runtime stage
-FROM eclipse-temurin:17-jre-alpine
+# ── Stage 2: Minimal runtime ──
+FROM eclipse-temurin:24-jre-alpine
 WORKDIR /app
 
-# Copy the built artifact from build stage
-COPY --from=build /app/target/*.jar app.jar
+RUN apk add --no-cache tzdata
 
-# Expose port
-EXPOSE 8087
+# Copy fat JAR
+COPY --from=build /app/target/restaurantManagementService-0.0.1-SNAPSHOT.jar app.jar
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+EXPOSE 8086
+
+ENTRYPOINT ["java", "-XX:+UseZGC", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

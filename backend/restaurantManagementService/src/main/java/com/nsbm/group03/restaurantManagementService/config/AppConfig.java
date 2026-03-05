@@ -16,6 +16,7 @@ public class AppConfig {
                 registry.addMapping("/**")
                         .allowedOriginPatterns(
                             "http://localhost:*",
+                            "https://hotelmanagement-system.vercel.app",
                             "https://*.vercel.app",
                             "https://*.devtunnels.ms",
                             "https://*.duckdns.org"
