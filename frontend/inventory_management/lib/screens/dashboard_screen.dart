@@ -11,15 +11,16 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class AppColors {
-  static const primary = Color(0xFF193DB3);
+  static const primary = Color(0xFF284BA8); // Main dark blue
   static const primaryLight = Color(0xFF3F5DD1);
-  static const primaryDark = Color(0xFF0F2573);
-  static const background = Color(0xFFF6F6F8);
+  static const primaryDark = Color(0xFF1E3A8A); // Darker blue for active states
+  static const background = Color(0xFFF5F6FA); // Light gray background
   static const surface = Color(0xFFFFFFFF);
   static const textPrimary = Color(0xFF0F172A);
   static const textSecondary = Color(0xFF64748B);
   static const border = Color(0xFFE2E8F0);
   static const slate50 = Color(0xFFF8FAFC);
+  static const accent = Color(0xFFFFC107); // Gold/Yellow accent
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
@@ -29,7 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   int _totalItemsCount = 0;
   int _lowStockCount = 0;
-  int _selectedIndex = 1; // 1 = Inventory, 4 = Reports
+  int _selectedIndex = 0;
   List<InventoryItem> _items = [];
 
   @override
@@ -39,24 +40,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _fetchData() {
-    final future = _inventoryService.fetchInventory();
     setState(() {
-      _inventoryFuture = future;
+      _inventoryFuture = _inventoryService.fetchInventory();
+      _inventoryFuture
+          .then((items) {
+            if (mounted) {
+              setState(() {
+                _items = items;
+                _totalItemsCount = items.length;
+                _lowStockCount = items.where((item) => item.isLowStock).length;
+              });
+            }
+          })
+          .catchError((error) {
+            // Handle error if needed
+          });
     });
-
-    future
-        .then((items) {
-          if (mounted) {
-            setState(() {
-              _items = items;
-              _totalItemsCount = items.length;
-              _lowStockCount = items.where((item) => item.isLowStock).length;
-            });
-          }
-        })
-        .catchError((_) {
-          // Handle or ignore gracefully in the future builder
-        });
   }
 
   @override
@@ -67,7 +66,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           _buildSidebar(),
           Expanded(
-            child: _selectedIndex == 4
+            child: _selectedIndex == 1
                 ? ReportsScreen(items: _items)
                 : _buildInventoryContent(),
           ),
@@ -79,14 +78,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildInventoryContent() {
     return Column(
       children: [
-        _buildHeader(),
+        _buildHeader(), // The new top area (Title + Add Button + Search)
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(32.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 32.0,
+              vertical: 16.0,
+            ),
             child: Column(
               children: [
                 _buildStatsGrid(),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 _buildInventoryDataBox(),
               ],
             ),
@@ -98,142 +100,129 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildSidebar() {
     return Container(
-      width: 288,
-      color: AppColors.surface,
+      width: 280,
+      color: AppColors.primary, // Dark blue background
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Branding
-          Container(
-            padding: const EdgeInsets.all(24.0),
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: AppColors.border)),
+          // Branding (Logo only)
+          Padding(
+            padding: const EdgeInsets.only(top: 40.0, bottom: 20.0),
+            child: Center(
+              child: Image.asset(
+                'assets/images/Hotel_Logo.png',
+                height: 100, // Adjust size as needed
+                // Using colorFilter if you need to tint it, otherwise leave as is if the logo is white text
+              ),
+            ),
+          ),
+
+          // User Profile Area
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 16.0,
             ),
             child: Row(
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    image: const DecorationImage(
-                      image: NetworkImage(
-                        "https://lh3.googleusercontent.com/aida-public/AB6AXuCJ9kme7nag09hgLi9WD-kjxjDDvixb3vq-Df_b85RUcT_NG23p8k7m8LXk8bAnXOrMXGMSVRIIsXY434vZW_XjMzCPP_42PAtYkqizFNIRfdcuUhJLVscFwjVirs6gLKJSLojCnU9_K0ELEfMQxS9_keNatEYkCUigcTnK_KoHbhIrzKDvfT8MtBcxuTLeVCX9QoQ05xOlPxZHLQnSChpZqfHVUi9eLM9bZxJJdty1we7WjLM52w3HoE84WWDx_p2WCHKWwpqgUdeo",
-                      ),
-                      fit: BoxFit.cover,
-                    ),
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: AppColors.primaryDark,
+                  child: const Icon(
+                    Icons.person_outline,
+                    color: AppColors.accent,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(width: 12),
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Grand Hotel",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    Text(
-                      "Admin Portal",
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Navigation
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-              children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Text(
-                    "MAIN MENU",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                ),
-                _buildNavItem(Icons.dashboard_outlined, "Dashboard", 0),
-                _buildNavItem(Icons.inventory_2, "Inventory", 1),
-                _buildNavItemWithBadge(
-                  Icons.shopping_cart_outlined,
-                  "Orders",
-                  2,
-                  "3",
-                ),
-                _buildNavItem(Icons.local_shipping_outlined, "Suppliers", 3),
-                _buildNavItem(Icons.bar_chart_outlined, "Reports", 4),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Divider(color: AppColors.border),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Text(
-                    "SYSTEM",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                ),
-                _buildNavItem(Icons.settings_outlined, "Settings", 5),
-                _buildNavItem(Icons.help_outline, "Help Center", 6),
-              ],
-            ),
-          ),
-          // User Profile Bottom
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: AppColors.border)),
-            ),
-            child: Row(
-              children: [
-                const CircleAvatar(
-                  radius: 16,
-                  backgroundImage: NetworkImage(
-                    "https://lh3.googleusercontent.com/aida-public/AB6AXuAhnyQwMfTd4cpRcTriRFVCaa2EUWsldopPg0XGVc-zkYopwddiqgGb5w18Zji80hQG5qtMdxPI3809df1PhothUBPettBmQyF8ji937373q0SDXDNDVIH1AUPs5VO3qw816-ClBQnYUB29663Q2h5SzB1S1wzkZamMiz49Y4C_1fHl2sT-d_WUJw7Jr8jl0ekU17aA1t2XXPAKdhmBkasUSBjiw_0W_MU3SQBvPr_xZvL3YkGW5j-F2PGO0l9U0ChvsUO0osG6mHM8",
-                  ),
-                ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Tom Cook",
+                        "Inventory Manager",
                         style: TextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                       Text(
-                        "Log out",
+                        "ADMIN",
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.accent,
+                          letterSpacing: 1.2,
                         ),
                       ),
                     ],
                   ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Navigation
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                // _buildNavItem(Icons.dashboard_outlined, "Dashboard", 0),
+                _buildNavItem(Icons.inventory_2_outlined, "Inventory", 0),
+                // _buildNavItem(Icons.shopping_cart_outlined, "Orders", 2),
+                // _buildNavItem(Icons.local_shipping_outlined, "Suppliers", 3),
+                _buildNavItem(Icons.bar_chart_outlined, "Reports", 1),
+              ],
+            ),
+          ),
+
+          // Bottom area: Logout and Footer
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: TextButton.icon(
+                    onPressed: () {
+                      // Handle logout
+                      Navigator.of(context).pushReplacementNamed('/');
+                    },
+                    icon: const Icon(
+                      Icons.logout,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    label: const Text(
+                      "Logout",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "© 2026 Hotel",
+                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  "Inventory Management System",
+                  style: TextStyle(color: Colors.white54, fontSize: 10),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
@@ -246,17 +235,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildNavItem(IconData icon, String title, int index) {
     bool isActive = _selectedIndex == index;
     return Container(
-      margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
-        color: isActive
-            ? AppColors.primary.withValues(alpha: 0.1)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
+        color: isActive ? Colors.white.withOpacity(0.15) : Colors.transparent,
+        border: Border(
+          left: BorderSide(
+            color: isActive ? AppColors.accent : Colors.transparent,
+            width: 4, // Gold indicator bar like in the image
+          ),
+        ),
       ),
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24.0),
         leading: Icon(
           icon,
-          color: isActive ? AppColors.primary : AppColors.textSecondary,
+          color: isActive ? Colors.white : Colors.white70,
           size: 22,
         ),
         title: Text(
@@ -264,197 +256,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-            color: isActive ? AppColors.primary : AppColors.textSecondary,
+            color: isActive ? Colors.white : Colors.white70,
           ),
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         onTap: () {
           setState(() {
             _selectedIndex = index;
           });
         },
-        hoverColor: AppColors.slate50,
-      ),
-    );
-  }
-
-  Widget _buildNavItemWithBadge(
-    IconData icon,
-    String title,
-    int index,
-    String badgeCount,
-  ) {
-    bool isActive = _selectedIndex == index;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      decoration: BoxDecoration(
-        color: isActive
-            ? AppColors.primary.withValues(alpha: 0.1)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: ListTile(
-        leading: Icon(
-          icon,
-          color: isActive ? AppColors.primary : AppColors.textSecondary,
-          size: 22,
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-            color: isActive ? AppColors.primary : AppColors.textSecondary,
-          ),
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-          decoration: BoxDecoration(
-            color: Colors.red.shade100,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            badgeCount,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.red.shade700,
-            ),
-          ),
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        onTap: () {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        hoverColor: AppColors.slate50,
       ),
     );
   }
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-      decoration: BoxDecoration(
-        color: AppColors.surface.withValues(alpha: 0.9),
-        border: const Border(bottom: BorderSide(color: AppColors.border)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.only(left: 32, right: 32, top: 32, bottom: 16),
+      color: AppColors.background,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Column(
+          // Top Row: Title + Add Button
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Inventory Overview",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                "Manage your hotel stock levels and orders.",
-                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Container(
-                width: 256,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  onSubmitted: (value) {
-                    setState(() {
-                      if (value.isEmpty) {
-                        _fetchData();
-                      } else {
-                        _inventoryFuture = _inventoryService.searchItems(value);
-                      }
-                    });
-                  },
-                  decoration: InputDecoration(
-                    hintText: "Search inventory...",
-                    hintStyle: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 14,
-                    ),
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: AppColors.textSecondary,
-                    ),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.clear, size: 16),
-                      onPressed: () {
-                        _searchController.clear();
-                        _fetchData();
-                      },
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Stack(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.notifications_none,
-                      color: AppColors.textSecondary,
-                    ),
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppColors.surface,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      shadowColor: Colors.black.withValues(alpha: 0.05),
-                      elevation: 2,
+                  const Text(
+                    "Inventory Directory",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.surface, width: 2),
-                      ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "$_totalItemsCount items found",
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(width: 16),
               ElevatedButton.icon(
                 onPressed: () => _showAddEditItemDialog(),
-                icon: const Icon(Icons.add, size: 20, color: Colors.white),
+                icon: const Icon(
+                  Icons.add_box_outlined,
+                  size: 20,
+                  color: Colors.white,
+                ),
                 label: const Text(
                   "Add Item",
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
@@ -462,16 +320,61 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   backgroundColor: AppColors.primary,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
-                    vertical: 12,
+                    vertical: 16,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  elevation: 2,
-                  shadowColor: AppColors.primary.withValues(alpha: 0.3),
+                  elevation: 0,
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 24),
+          // Search Bar Row
+          Container(
+            height: 50,
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: TextField(
+              controller: _searchController,
+              onSubmitted: (value) {
+                setState(() {
+                  if (value.isEmpty) {
+                    _fetchData();
+                  } else {
+                    _inventoryFuture = _inventoryService.searchItems(value);
+                  }
+                });
+              },
+              decoration: InputDecoration(
+                hintText: "Search by item name or category...",
+                hintStyle: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 14,
+                ),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: AppColors.textSecondary,
+                  size: 20,
+                ),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear, size: 16),
+                  onPressed: () {
+                    _searchController.clear();
+                    _fetchData();
+                  },
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -483,51 +386,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         Expanded(
           child: _buildStatCard(
-            "Total Items",
+            "Total Available Stock",
             _totalItemsCount.toString(),
             Icons.inventory_2,
-            Colors.blue,
-            "12%",
-            Icons.trending_up,
-            true,
+            AppColors.primary,
           ),
         ),
         const SizedBox(width: 24),
         Expanded(
           child: _buildStatCard(
-            "Low Stock Alert",
+            "Low Stock Items",
             _lowStockCount.toString(),
             Icons.warning_amber_rounded,
             Colors.orange,
-            "+3 new",
-            Icons.trending_up,
-            false,
           ),
         ),
-        const SizedBox(width: 24),
-        // Expanded(
-        //   child: _buildStatCard(
-        //     "Pending Orders",
-        //     "8",
-        //     Icons.pending_actions,
-        //     Colors.purple,
-        //     "-2",
-        //     Icons.trending_down,
-        //     false,
-        //   ),
-        // ),
-        // const SizedBox(width: 24),
-        // Expanded(
-        //   child: _buildStatCard(
-        //     "Total Value",
-        //     "\$45,200",
-        //     Icons.payments_outlined,
-        //     Colors.green,
-        //     "5%",
-        //     Icons.trending_up,
-        //     true,
-        //   ),
-        // ),
       ],
     );
   }
@@ -536,10 +409,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     String title,
     String value,
     IconData icon,
-    MaterialColor color,
-    String trend,
-    IconData trendIcon,
-    bool isTrendPositive,
+    Color color,
   ) {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -549,7 +419,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -564,44 +434,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.shade50,
+                  color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: color.shade600, size: 24),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: isTrendPositive
-                      ? Colors.green.shade50
-                      : Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      trendIcon,
-                      size: 14,
-                      color: isTrendPositive
-                          ? Colors.green.shade700
-                          : Colors.red.shade700,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      trend,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: isTrendPositive
-                            ? Colors.green.shade700
-                            : Colors.red.shade700,
-                      ),
-                    ),
-                  ],
-                ),
+                child: Icon(icon, color: color, size: 24),
               ),
             ],
           ),
@@ -760,12 +596,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: DataTable(
-                  headingRowColor: WidgetStateProperty.all(AppColors.slate50),
+                  headingRowColor: WidgetStateProperty.all(AppColors.primary),
                   dataRowMaxHeight: 80,
                   dataRowMinHeight: 80,
                   dividerThickness: 1,
                   horizontalMargin: 24,
                   columnSpacing: 40,
+                  headingTextStyle: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                   border: const TableBorder(
                     horizontalInside: BorderSide(color: AppColors.border),
                   ),
@@ -774,7 +614,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       label: Text(
                         'Item Name',
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                           letterSpacing: 0.5,
@@ -785,7 +625,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       label: Text(
                         'Category',
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                           letterSpacing: 0.5,
@@ -796,7 +636,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       label: Text(
                         'SKU',
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                           letterSpacing: 0.5,
@@ -807,7 +647,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       label: Text(
                         'Quantity',
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                           letterSpacing: 0.5,
@@ -818,7 +658,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       label: Text(
                         'Status',
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                           letterSpacing: 0.5,
@@ -829,7 +669,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       label: Text(
                         'Actions',
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                           letterSpacing: 0.5,
@@ -992,63 +832,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             children: [
                               Container(
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: AppColors.border),
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.green.shade50,
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: IconButton(
                                   padding: const EdgeInsets.all(4),
                                   constraints: const BoxConstraints(),
-                                  icon: const Icon(
-                                    Icons.add_shopping_cart,
-                                    size: 18,
-                                    color: Colors.green,
-                                  ),
-                                  tooltip: 'Restock',
-                                  hoverColor: Colors.green.withValues(
-                                    alpha: 0.1,
-                                  ),
-                                  onPressed: () => _showRestockDialog(item),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: AppColors.border),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: IconButton(
-                                  padding: const EdgeInsets.all(4),
-                                  constraints: const BoxConstraints(),
-                                  icon: const Icon(
-                                    Icons.remove_shopping_cart_outlined,
-                                    size: 18,
-                                    color: Colors.orange,
-                                  ),
-                                  tooltip: 'Consume',
-                                  hoverColor: Colors.orange.withValues(
-                                    alpha: 0.1,
-                                  ),
-                                  onPressed: () => _showConsumeDialog(item),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: AppColors.border),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: IconButton(
-                                  padding: const EdgeInsets.all(4),
-                                  constraints: const BoxConstraints(),
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.edit_outlined,
-                                    size: 18,
-                                    color: AppColors.primary,
+                                    size: 16,
+                                    color: Colors.green.shade400,
                                   ),
-                                  tooltip: 'Edit',
-                                  hoverColor: AppColors.primary.withValues(
-                                    alpha: 0.1,
-                                  ),
+                                  tooltip: 'Edit/Restock',
                                   onPressed: () =>
                                       _showAddEditItemDialog(item: item),
                                 ),
@@ -1056,19 +851,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               const SizedBox(width: 8),
                               Container(
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: AppColors.border),
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.red.shade50,
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: IconButton(
                                   padding: const EdgeInsets.all(4),
                                   constraints: const BoxConstraints(),
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.delete_outline,
-                                    size: 18,
-                                    color: Colors.red,
+                                    size: 16,
+                                    color: Colors.red.shade400,
                                   ),
                                   tooltip: 'Delete',
-                                  hoverColor: Colors.red.withValues(alpha: 0.1),
                                   onPressed: () async {
                                     final confirm = await showDialog<bool>(
                                       context: context,
@@ -1127,6 +921,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   },
                                 ),
                               ),
+                              const SizedBox(width: 8),
+                              // Optional: Keep Consume as a separate button if required
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.shade50,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: IconButton(
+                                  padding: const EdgeInsets.all(4),
+                                  constraints: const BoxConstraints(),
+                                  icon: Icon(
+                                    Icons.remove_shopping_cart_outlined,
+                                    size: 16,
+                                    color: Colors.orange.shade400,
+                                  ),
+                                  tooltip: 'Consume',
+                                  onPressed: () => _showConsumeDialog(item),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -1181,60 +994,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  void _showRestockDialog(InventoryItem item) {
-    final TextEditingController amountController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Restock ${item.name}'),
-          content: TextField(
-            controller: amountController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Added Amount',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final amount = int.tryParse(amountController.text) ?? 0;
-                if (amount > 0) {
-                  Navigator.pop(context);
-                  try {
-                    await _inventoryService.restockItem(item.id, amount);
-                    _fetchData();
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Item restocked successfully'),
-                      ),
-                    );
-                  } catch (e) {
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(e.toString()),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              },
-              child: const Text('Restock'),
-            ),
-          ],
-        );
-      },
     );
   }
 

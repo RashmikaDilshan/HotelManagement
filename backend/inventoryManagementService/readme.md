@@ -133,7 +133,7 @@ Data Transfer Object encapsulating item properties, representing the same fields
 #### 3. Constants & Configurations (`application.properties`)
 - Configured to use PostgreSQL by default (`org.postgresql.Driver`).
 - Uses environment variables for database URLs and credentials.
-- Application runs on **port 8087**.
+- Application runs on **port 8084**.
 
 ### API Endpoints
 
@@ -242,7 +242,7 @@ spring.datasource.driver-class-name=org.postgresql.Driver
 spring.datasource.username=${SPRING_DATASOURCE_USERNAME}
 spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
 spring.jpa.hibernate.ddl-auto=${SPRING_JPA_HIBERNATE_DDL_AUTO}
-server.port=8087
+server.port=8084
 ```
 
 ---
@@ -308,4 +308,4 @@ flutter build web
 
 **Last Updated**: March 2026  
 **Status**: ✅ Implementation Available  
-**Port**: `8087`
+**Port**: `8084`

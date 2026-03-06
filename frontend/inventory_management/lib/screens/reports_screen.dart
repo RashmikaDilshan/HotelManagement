@@ -128,26 +128,6 @@ class ReportsScreen extends StatelessWidget {
       children: [
         Expanded(
           child: _buildStatCard(
-            "Monthly Usage",
-            "\$12,450",
-            "5.2%",
-            true,
-            "Compared to \$11,834 last month",
-          ),
-        ),
-        const SizedBox(width: 24),
-        Expanded(
-          child: _buildStatCard(
-            "Inventory Turnover",
-            "4.2x",
-            "0.8%",
-            false,
-            "Industry average: 3.8x",
-          ),
-        ),
-        const SizedBox(width: 24),
-        Expanded(
-          child: _buildStatCard(
             "Total Items in Stock",
             "$_totalItems",
             "",
@@ -249,13 +229,7 @@ class ReportsScreen extends StatelessWidget {
   }
 
   Widget _buildVisualizationsRow() {
-    return Row(
-      children: [
-        Expanded(child: _buildUsageByCategoryChart()),
-        const SizedBox(width: 24),
-        Expanded(child: _buildStockLevelsChart()),
-      ],
-    );
+    return Row(children: [Expanded(child: _buildUsageByCategoryChart())]);
   }
 
   Widget _buildUsageByCategoryChart() {
@@ -395,139 +369,6 @@ class ReportsScreen extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildStockLevelsChart() {
-    return Container(
-      height: 340,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Stock Levels Over Time",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0F172A),
-                    ),
-                  ),
-                  Text(
-                    "Inventory volume (Units)",
-                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Row(
-                  children: [
-                    Text(
-                      "Mocked - No historical data API",
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F172A),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    const Color(0xFF1E3FAE).withValues(alpha: 0.1),
-                    Colors.white.withValues(alpha: 0.0),
-                  ],
-                ),
-              ),
-              child: CustomPaint(painter: LineChartPainter()),
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "JAN",
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF94A3B8),
-                ),
-              ),
-              Text(
-                "FEB",
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF94A3B8),
-                ),
-              ),
-              Text(
-                "MAR",
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF94A3B8),
-                ),
-              ),
-              Text(
-                "APR",
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF94A3B8),
-                ),
-              ),
-              Text(
-                "MAY",
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF94A3B8),
-                ),
-              ),
-              Text(
-                "JUN",
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF94A3B8),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -716,59 +557,4 @@ class ReportsScreen extends StatelessWidget {
       ],
     );
   }
-}
-
-class LineChartPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFF1E3FAE)
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final path = Path();
-
-    // Create points based on the SVG coordinates from HTML
-    // M0,120 Q50,110 80,60 T160,80 T240,40 T320,100 T400,20
-    final double w = size.width;
-    final double h = size.height;
-
-    // Normalize coordinates based on SVG 400x150 viewbox
-    double scaleX = w / 400;
-    double scaleY = h / 150;
-
-    path.moveTo(0, 120 * scaleY);
-    path.quadraticBezierTo(50 * scaleX, 110 * scaleY, 80 * scaleX, 60 * scaleY);
-    path.quadraticBezierTo(
-      120 * scaleX,
-      10 * scaleY,
-      160 * scaleX,
-      80 * scaleY,
-    );
-    path.quadraticBezierTo(
-      200 * scaleX,
-      150 * scaleY,
-      240 * scaleX,
-      40 * scaleY,
-    );
-    path.quadraticBezierTo(
-      280 * scaleX,
-      -70 * scaleY,
-      320 * scaleX,
-      100 * scaleY,
-    );
-    path.quadraticBezierTo(
-      360 * scaleX,
-      270 * scaleY,
-      400 * scaleX,
-      20 * scaleY,
-    );
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
